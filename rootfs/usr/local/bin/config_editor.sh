@@ -25,6 +25,7 @@ for config_file in $(env | grep '_config_file'); do
     for matched in $(env | grep -v '_config_file\|_operator' | grep "^${prefix}_"); do
         var="${matched%=*}"
         var="${var#*_}"
+        var=$(echo $var | sed 's/_dash_/-/g')
         val="${matched#*=}"
         if grep "^[ ]*${var}" "$file"; then
             sed -i "s/^([ ]*)${var}([ ]*){$operator}([ ]*)[^ ].*/\\\1${var}\\\2${operator}\\\3${val}/" "${file}"
