@@ -8,8 +8,7 @@ RUN set -e \
     && apt-get install -y \
     --no-install-recommends \
     --no-install-suggests \
-    vim dnsutils netcat rsync tar libaio1 \
-    curl pigz percona-toolkit pv \
+    vim dnsutils curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R mysql:mysql /etc/mysql \
@@ -26,5 +25,5 @@ EXPOSE 3306 4444 4567 4567/udp 4568
 
 COPY rootfs/ /
 
-ENTRYPOINT ["/usr/local/bin/galera-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/mariadb-entrypoint.sh"]
 CMD ["mysqld"]
