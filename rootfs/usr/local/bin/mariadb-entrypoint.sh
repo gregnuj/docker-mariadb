@@ -3,8 +3,6 @@
 set -eo pipefail
 shopt -s nullglob
 
-source "galera_common.sh"
-
 # Create/Modify config files based on env
 source "config_editor.sh"
 
@@ -43,9 +41,26 @@ fi
 
 # Configure database if MYSQLD_INIT is set
 if [[ ! -z "${MYSQLD_INIT}" ]]; then
-    source "mysql_init.sh"
+    source mysql_init.sh
 fi
 
+# Configure replication if REPLICATION_METHOD is set
+if [[ ! -z "${REPLICATION_METHOD}" ]]; then
+    source replication_init.sh
+
+    #  recover galera/xtrabackup
+    if [[ ! -z "${GALERA_INIT}" ]]; then
+        if [[ -f "$(grastate_dat)" ]]; then
+            mysqld ${cmd[@]:1} --wsrep-recover
+        fi
+        if [[ ! -z $(is_primary_component) ]]; then
+            if [[ -f "$(grastate_dat)" ]]; then
+                sed -i -e 's/^safe_to_bootstrap: *0/safe_to_bootstrap: 1/' $(grastate_dat)
+            fi
+            cmd+=( " --wsrep-new-cluster" )
+        fi
+    fi
+fi
 
 tail -f /var/log/mysql/error.log &
 exec ${cmd[*]} 2>&1

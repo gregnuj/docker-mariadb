@@ -24,11 +24,6 @@ function mysql_user(){
     echo "$USER"
 }
 
-function wsrep_user(){
-    WSREP_USER="${WSREP_USER:="xtrabackup"}"
-    echo "$WSREP_USER"
-}
-
 function mysql_password(){
     USER="$(mysql_user $1)"
     if [[ $USER == "root" ]]; then

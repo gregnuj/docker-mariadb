@@ -4,7 +4,6 @@
 [[ -z "$DEBUG" ]] || set -x
 
 source mysql_common.sh
-source galera_common.sh
 declare MYSQLD=( $@ )
 
 function mysql_init_install(){
@@ -80,18 +79,6 @@ function mysql_init_user(){
     echo "Created user $MYSQL_USER"
 }
 
-function mysql_init_wsrep(){
-    mysql=( $(mysql_client) );
-    WSREP_SST_USER="${WSREP_SST_USER:="$(wsrep_sst_user)"}"
-    WSREP_SST_PASWORD="${WSREP_SST_PASWORD:="$(mysql_password $WSREP_SST_USER)"}"
-    echo "CREATE USER IF NOT EXISTS '${WSREP_SST_USER}'@'127.0.0.1' IDENTIFIED BY '${WSREP_SST_PASWORD}';" | "${mysql[@]}"
-    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${WSREP_SST_USER}'@'127.0.0.1';"    | "${mysql[@]}"
-    echo "CREATE USER IF NOT EXISTS '${WSREP_SST_USER}'@'localhost' IDENTIFIED BY '${WSREP_SST_PASWORD}';" | "${mysql[@]}"
-    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${WSREP_SST_USER}'@'localhost';"    | "${mysql[@]}"
-    echo 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
-    echo "Created user $WSREP_SST_USER"
-}
-
 function mysql_init_scripts(){
     mysql=( $(mysql_client) )
     for f in /etc/initdb.d/*; do
@@ -114,8 +101,9 @@ function main(){
     mysql_init_tz 
     mysql_init_user 
     mysql_init_database
-    mysql_init_wsrep
     mysql_init_scripts 
     mysql_shutdown
     echo "Initailizing database completed"
 }
+
+main
