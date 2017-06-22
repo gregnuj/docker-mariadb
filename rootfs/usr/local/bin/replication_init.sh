@@ -60,7 +60,7 @@ function replication_init_slave(){
     echo "MASTER_PASSWORD='$(replication_password)'," >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_PORT=3306," >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_CONNECT_RETRY=10;" >> "$REPLICATION_SLAVE_SQL"
-    echo "START SLAVE" >> "$REPLICATION_SLAVE_SQL"
+    echo "START SLAVE;" >> "$REPLICATION_SLAVE_SQL"
     echo "[mariadb]" >> "$REPLICATION_SLAVE_CNF"
     echo "server_id=$(node_number)" >> "$REPLICATION_SLAVE_CNF"
 }
