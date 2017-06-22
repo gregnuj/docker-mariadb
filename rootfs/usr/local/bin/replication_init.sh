@@ -34,7 +34,7 @@ function replication_init_user(){
     echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'127.0.0.1';"  >> "$REPLICATION_USERS_SQL"
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'localhost' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
     echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'localhost';" >> "$REPLICATION_USERS_SQL"
-    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'localhost' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
+    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
     echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%';" >> "$REPLICATION_USERS_SQL"
     echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
     echo "Created user $REPLICATION_USER"
@@ -44,17 +44,23 @@ function replication_init_xtrabackup(){
     source xtrabackup_cnf.sh
 }
 
+function replication_init_cnf(){
+    REPLICATION_CNF="/etc/mysql/conf.d/master.cnf"
+    echo "[mariadb]" >> "$REPLICATION_CNF"
+    echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
+    echo "log-bin" >> "$REPLICATION_CNF"
+    echo "log-basename=mysql-bin" >> "$REPLICATION_CNF"
+    echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
+    echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
+    echo "expire_logs_days=15" >> "$REPLICATION_CNF"
+    echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
+}
+
 function replication_init_master(){
-    REPLICATION_MASTER_CNF="/etc/mysql/conf.d/master.cnf"
-    REPLICATION_MASTER_SQL="/etc/initdb.d/master.sql"
-    echo "[mariadb]" >> "$REPLICATION_MASTER_CNF"
-    echo "server_id=1" >> "$REPLICATION_MASTER_CNF"
-    echo "log-bin" >> "$REPLICATION_MASTER_CNF"
-    echo "log-basename=master1" >> "$REPLICATION_MASTER_CNF"
+    :
 }
 
 function replication_init_slave(){
-    REPLICATION_SLAVE_CNF="/etc/mysql/conf.d/slave.cnf"
     REPLICATION_SLAVE_SQL="/etc/initdb.d/slave.sql"
     echo "CHANGE MASTER TO" >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SLAVE_SQL"
@@ -63,23 +69,25 @@ function replication_init_slave(){
     echo "MASTER_PORT=3306," >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_CONNECT_RETRY=10;" >> "$REPLICATION_SLAVE_SQL"
     echo "START SLAVE;" >> "$REPLICATION_SLAVE_SQL"
-    echo "[mariadb]" >> "$REPLICATION_SLAVE_CNF"
-    echo "server_id=$(node_number)" >> "$REPLICATION_SLAVE_CNF"
 }
 
 function main(){
-    replication_init_user
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
+            replication_init_user
             replication_init_xtrabackup
             ;;
         master)
             MASTER_INIT=1
+            replication_init_user
+            replication_init_cnf
             replication_init_master
             ;;
         slave)
             SLAVE_INIT=1
+            replication_init_user
+            replication_init_cnf
             replication_init_slave
             ;;
     esac
