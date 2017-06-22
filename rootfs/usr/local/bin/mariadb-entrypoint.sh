@@ -62,5 +62,4 @@ if [[ ! -z "${GALERA_INIT}" ]]; then
     fi
 fi
 
-tail -f /var/log/mysql/error.log &
 exec ${cmd[*]} 2>&1
