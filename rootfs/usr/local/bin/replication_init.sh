@@ -27,7 +27,7 @@ function replication_password(){
 }
 
 function replication_init_user(){
-    REPLICATION_USERS_SQL="/etc/initdb.db/users.sql"
+    REPLICATION_USERS_SQL="/etc/initdb.d/users.sql"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'127.0.0.1' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
@@ -44,7 +44,7 @@ function replication_init_xtrabackup(){
 
 function replication_init_master(){
     REPLICATION_MASTER_CNF="/etc/mysql/conf.d/master.cnf"
-    REPLICATION_MASTER_SQL="/etc/initdb.db/master.sql"
+    REPLICATION_MASTER_SQL="/etc/initdb.d/master.sql"
     echo "[mariadb]" >> "$REPLICATION_MASTER_CNF"
     echo "server_id=1" >> "$REPLICATION_MASTER_CNF"
     echo "log-bin" >> "$REPLICATION_MASTER_CNF"
@@ -53,7 +53,7 @@ function replication_init_master(){
 
 function replication_init_slave(){
     REPLICATION_SLAVE_CNF="/etc/mysql/conf.d/slave.cnf"
-    REPLICATION_SLAVE_SQL="/etc/initdb.db/slave.sql"
+    REPLICATION_SLAVE_SQL="/etc/initdb.d/slave.sql"
     echo "CHANGE MASTER TO" >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_USER='$(replication_user)'," >> "$REPLICATION_SLAVE_SQL"
