@@ -75,20 +75,20 @@ function main(){
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
-            replication_init_user
             replication_init_xtrabackup
+            replication_init_user
             ;;
         master)
             MASTER_INIT=1
-            replication_init_user
-            replication_init_cnf
             replication_init_master
+            replication_init_cnf
+            replication_init_user
             ;;
         slave)
             SLAVE_INIT=1
-            replication_init_user
-            replication_init_cnf
             replication_init_slave
+            replication_init_cnf
+            replication_init_user
             ;;
     esac
 }
