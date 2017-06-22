@@ -11,7 +11,9 @@ RUN set -e \
     vim dnsutils curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/initdb.d  \
     && chown -R mysql:mysql /etc/mysql \
+    && chown -R mysql:mysql /etc/initdb.d \
     && chown -R mysql:mysql /var/lib/mysql \
     && rm -rf /docker-entrypoint* \
     && sed -ie 's/docker-entrypoint-initdb.d/etc\/initdb.d/' /usr/local/bin/docker-entrypoint.sh 
