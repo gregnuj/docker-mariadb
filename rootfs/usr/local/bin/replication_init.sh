@@ -11,7 +11,7 @@ function replication_cnf(){
     echo "${REPLICATION_CNF}"
 }
 
-function replication_user(){
+function replication_master(){
     REPLICATION_MASTER="${REPLICATION_MASTER:="master"}"
     echo "$REPLICATION_MASTER"
 }
