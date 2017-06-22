@@ -37,7 +37,7 @@ function replication_init_user(){
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
     echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%';" >> "$REPLICATION_USERS_SQL"
     echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
-    echo "Created user $REPLICATION_USER"
+    echo "Created $REPLICATION_USERS_SQL"
 }
 
 function replication_init_xtrabackup(){
@@ -45,7 +45,7 @@ function replication_init_xtrabackup(){
 }
 
 function replication_init_cnf(){
-    REPLICATION_CNF="/etc/mysql/conf.d/master.cnf"
+    REPLICATION_CNF="$(replication_cnf)"
     echo "[mariadb]" >> "$REPLICATION_CNF"
     echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
     echo "log-bin" >> "$REPLICATION_CNF"
@@ -54,10 +54,12 @@ function replication_init_cnf(){
     echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
     echo "expire_logs_days=15" >> "$REPLICATION_CNF"
     echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
+    echo "Created $REPLICATION_CNF"
 }
 
 function replication_init_master(){
-    :
+    REPLICATION_MASTER_SQL="/etc/initdb.d/master.sql"
+    echo "Created $REPLICATION_MASTER_SQL"
 }
 
 function replication_init_slave(){
@@ -69,6 +71,7 @@ function replication_init_slave(){
     echo "MASTER_PORT=3306," >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_CONNECT_RETRY=10;" >> "$REPLICATION_SLAVE_SQL"
     echo "START SLAVE;" >> "$REPLICATION_SLAVE_SQL"
+    echo "Created $REPLICATION_SLAVE_SQL"
 }
 
 function main(){
