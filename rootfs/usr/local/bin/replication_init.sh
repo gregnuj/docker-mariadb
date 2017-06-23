@@ -30,19 +30,12 @@ function replication_init_user(){
     REPLICATION_USERS_SQL="/etc/initdb.d/users.sql"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
-    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'127.0.0.1' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
-    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'127.0.0.1';"  >> "$REPLICATION_USERS_SQL"
-    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'localhost' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
-    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'localhost';" >> "$REPLICATION_USERS_SQL"
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
-    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT REPLICATION SLAVE ON *.* TO ${REPLICATION_USER}@%;" >> "$REPLICATION_USERS_SQL"
     echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
     echo "Created $REPLICATION_USERS_SQL"
 }
 
-function replication_init_xtrabackup(){
-    source xtrabackup_cnf.sh
-}
 
 function replication_init_cnf(){
     REPLICATION_CNF="$(replication_cnf)"
@@ -77,12 +70,21 @@ function replication_init_slave(){
     echo "Created $REPLICATION_SLAVE_SQL"
 }
 
+function replication_init_xtrabackup(){
+    REPLICATION_USERS_SQL="/etc/initdb.d/users.sql"
+    REPLICATION_USER="$(replication_user)"
+    REPLICATION_PASSWORD="$(replication_password)"
+    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'127.0.0.1' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'127.0.0.1';"  >> "$REPLICATION_USERS_SQL"
+    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'localhost' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'localhost';" >> "$REPLICATION_USERS_SQL"
+    source xtrabackup_cnf.sh
+}
 function main(){
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
             replication_init_xtrabackup
-            replication_init_user
             ;;
         master)
             MASTER_INIT=1
