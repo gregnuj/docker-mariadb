@@ -47,7 +47,6 @@ function replication_init_xtrabackup(){
 function replication_init_cnf(){
     REPLICATION_CNF="$(replication_cnf)"
     echo "[mariadb]" >> "$REPLICATION_CNF"
-    echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
     echo "log-bin" >> "$REPLICATION_CNF"
     echo "log-basename=mysql-bin" >> "$REPLICATION_CNF"
     echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
@@ -58,11 +57,15 @@ function replication_init_cnf(){
 }
 
 function replication_init_master(){
+    REPLICATION_CNF="$(replication_cnf)"
+    echo "server_id=1" >> "$REPLICATION_CNF"
     REPLICATION_MASTER_SQL="/etc/initdb.d/master.sql"
     echo "Created $REPLICATION_MASTER_SQL"
 }
 
 function replication_init_slave(){
+    REPLICATION_CNF="$(replication_cnf)"
+    echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
     REPLICATION_SLAVE_SQL="/etc/initdb.d/slave.sql"
     echo "CHANGE MASTER TO" >> "$REPLICATION_SLAVE_SQL"
     echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SLAVE_SQL"
