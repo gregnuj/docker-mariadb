@@ -106,6 +106,7 @@ function main(){
             ;;
         slave)
             SLAVE_INIT=1
+            MYSQL_INIT=""
             replication_init_slave
             ;;
     esac

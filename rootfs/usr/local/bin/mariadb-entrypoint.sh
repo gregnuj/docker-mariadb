@@ -34,18 +34,18 @@ if [[ "$(id -u)" = '0' ]]; then
     exec gosu mysql "$BASH_SOURCE" "$@"
 fi
 
-# Configure replication if REPLICATION_METHOD is set
-if [[ ! -z "${REPLICATION_METHOD}" ]]; then
-    source replication_init.sh
-fi
-
 # Set env MYSQLD_INIT to trigger setup 
 if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
     MYSQLD_INIT=${MYSQLD_INIT:=1}
 fi
 
-# Configure database if MYSQLD_INIT is set
+# Configure replication if REPLICATION_METHOD is set
+if [[ ! -z "${REPLICATION_METHOD}" ]]; then
+    source replication_init.sh
+fi
+
 if [[ ! -z "${MYSQLD_INIT}" ]]; then
+    # Configure database if MYSQLD_INIT is set
     source mysql_init.sh
 fi
 
