@@ -93,8 +93,10 @@ function replication_init_user(){
 
 
 function replication_init_cnf(){
+    SERVER_ID="$1"
     REPLICATION_CNF="$(replication_cnf)"
     echo "[mariadb]" >> "$REPLICATION_CNF"
+    echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
     echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
     echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
     echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
@@ -106,16 +108,16 @@ function replication_init_cnf(){
 }
 
 function replication_init_master(){
-    replication_init_cnf
-    echo "server_id=1" >> "$REPLICATION_CNF"
+    replication_init_cnf 1
+    
+    REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
     echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
     echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
 
 function replication_init_slave(){
     sleep 20 # wait for master
-    replication_init_cnf
-    echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
+    replication_init_cnf $(node_number)
 
     REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
     echo "CHANGE MASTER TO" >> "$REPLICATION_SQL"
