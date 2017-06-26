@@ -1,5 +1,4 @@
 #!/bin/bash -e
-#
 
 [[ -z "$DEBUG" ]] || set -x
 
@@ -61,22 +60,80 @@ function mysql_init_tz(){
 }
 
 function mysql_init_database(){
-    mysql=( $(mysql_client) )
     SERVICE_NAME="${SERVICE_NAME:="$(service_name)"}"
     MYSQL_DATABASE="${MYSQL_DATABASE:="${SERVICE_NAME%-*}"}"
-    echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" | "${mysql[@]}"
+    MYSQL_DATABASE_SQL="/etc/initdb.d/10-database.sql"
+    echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" >> "$MYSQL_DATABASE_SQL"
 }
 
 function mysql_init_user(){
-    mysql=( $(mysql_client) );
+    MYSQL_USERS_SQL="/etc/initdb.d/50-users.sql"
     SERVICE_NAME="${SERVICE_NAME:="$(service_name)"}"
     MYSQL_DATABASE="${MYSQL_DATABASE:="${SERVICE_NAME%-*}"}"
     MYSQL_USER="${MYSQL_USER:="${MYSQL_DATABASE}"}"
     MYSQL_PASSWORD="$(mysql_password $MYSQL_USER)"
-    echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;" | "${mysql[@]}"
-    echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" | "${mysql[@]}"
-    echo 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
+    echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;" >> "$MYSQL_USERS_SQL"
+    echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" >> "$MYSQL_USERS_SQL"
+    echo 'FLUSH PRIVILEGES ;' >> "$MYSQL_USERS_SQL"
     echo "Created user $MYSQL_USER"
+}
+
+
+function replication_init_user(){
+    REPLICATION_USERS_SQL="/etc/initdb.d/50-users.sql"
+    REPLICATION_USER="$(replication_user)"
+    REPLICATION_PASSWORD="$(replication_password)"
+    echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT REPLICATION SLAVE ON *.* TO '${REPLICATION_USER}'@'%';" >> "$REPLICATION_USERS_SQL"
+    echo "GRANT LOCK TABLES ON *.* TO '${REPLICATION_USER}'@'%';"  >> "$REPLICATION_USERS_SQL"
+    echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
+    echo "Created $REPLICATION_USERS_SQL"
+}
+
+
+function replication_init_cnf(){
+    REPLICATION_CNF="$(replication_cnf)"
+    echo "[mariadb]" >> "$REPLICATION_CNF"
+    echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
+    echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
+    echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
+    echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
+    echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
+    echo "expire_logs_days=15" >> "$REPLICATION_CNF"
+    echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
+    echo "Created $REPLICATION_CNF"
+}
+
+function replication_init_master(){
+    replication_init_cnf
+    echo "server_id=1" >> "$REPLICATION_CNF"
+    echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
+    echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
+}
+
+function replication_init_slave(){
+    sleep 20 # wait for master
+    replication_init_cnf
+    echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
+
+    REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
+    echo "CHANGE MASTER TO" >> "$REPLICATION_SQL"
+    echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SQL"
+    echo "MASTER_USER='$(replication_user)'," >> "$REPLICATION_SQL"
+    echo "MASTER_PASSWORD='$(replication_password)'," >> "$REPLICATION_SQL"
+    echo "MASTER_PORT=3306," >> "$REPLICATION_SQL"
+    echo "MASTER_CONNECT_RETRY=30;" >> "$REPLICATION_SQL"
+    echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
+    echo "START SLAVE;" >> "$REPLICATION_SQL"
+    echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
+    echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
+    echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
+    echo "Created $REPLICATION_SQL"
+}
+
+function replication_init_xtrabackup(){
+    source xtrabackup_cnf.sh
 }
 
 function mysql_init_scripts(){
@@ -93,17 +150,34 @@ function mysql_init_scripts(){
 }
 
 function main(){
-    echo "Initailizing new database"
+    case "${REPLICATION_METHOD}" in
+        xtrabackup*)
+            GALERA_INIT=1
+            mysql_init_user 
+            mysql_init_database
+            replication_init_xtrabackup
+            ;;
+        master)
+            mysql_init_user 
+            mysql_init_database
+            replication_init_master
+            ;;
+        slave)
+            replication_init_slave
+            ;;
+        *)
+            mysql_init_user 
+            mysql_init_database
+            ;;
+    esac
     mysql_init_install
     mysql_init_start
     mysql_init_check 
     mysql_init_root 
     mysql_init_tz 
-    mysql_init_user 
-    mysql_init_database
     mysql_init_scripts 
     mysql_shutdown
-    echo "Initailizing database completed"
 }
 
-main
+main 
+

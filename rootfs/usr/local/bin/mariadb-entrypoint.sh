@@ -3,6 +3,8 @@
 set -eo pipefail
 shopt -s nullglob
 
+source "mysql_common.sh"
+
 # Create/Modify config files based on env
 source "config_editor.sh"
 
@@ -39,13 +41,8 @@ if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
     MYSQLD_INIT=${MYSQLD_INIT:=1}
 fi
 
-# Configure replication if REPLICATION_METHOD is set
-if [[ ! -z "${REPLICATION_METHOD}" ]]; then
-    source replication_init.sh
-fi
-
+# Configure database if MYSQLD_INIT is set
 if [[ ! -z "${MYSQLD_INIT}" ]]; then
-    # Configure database if MYSQLD_INIT is set
     source mysql_init.sh
 fi
 
