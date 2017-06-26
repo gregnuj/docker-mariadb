@@ -36,15 +36,8 @@ if [[ "$(id -u)" = '0' ]]; then
     exec gosu mysql "$BASH_SOURCE" "$@"
 fi
 
-# Set env MYSQLD_INIT to trigger setup 
-if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
-    MYSQLD_INIT=${MYSQLD_INIT:=1}
-fi
 
-# Configure database if MYSQLD_INIT is set
-if [[ ! -z "${MYSQLD_INIT}" ]]; then
-    source mysql_init.sh
-fi
+source mysql_init.sh
 
 #  recover galera/xtrabackup
 if [[ ! -z "${GALERA_INIT}" ]]; then

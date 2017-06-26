@@ -3,6 +3,7 @@
 [[ -z "$DEBUG" ]] || set -x
 
 source mysql_common.sh
+
 declare MYSQLD=( $@ )
 
 function mysql_init_install(){
@@ -60,10 +61,10 @@ function mysql_init_tz(){
 }
 
 function mysql_init_database(){
-    SERVICE_NAME="${SERVICE_NAME:="$(service_name)"}"
-    MYSQL_DATABASE="${MYSQL_DATABASE:="${SERVICE_NAME%-*}"}"
-    MYSQL_DATABASE_SQL="/etc/initdb.d/10-database.sql"
-    echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" >> "$MYSQL_DATABASE_SQL"
+    if [[ ! -z "$MYSQL_DATABASE" ]]; then
+        MYSQL_DATABASE_SQL="/etc/initdb.d/10-database.sql"
+        echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` ;" >> "$MYSQL_DATABASE_SQL"
+    fi
 }
 
 function mysql_init_user(){
@@ -172,13 +173,19 @@ function main(){
             mysql_init_database
             ;;
     esac
-    mysql_init_install
-    mysql_init_start
-    mysql_init_check 
-    mysql_init_root 
-    mysql_init_tz 
-    mysql_init_scripts 
-    mysql_shutdown
+    # Set env MYSQLD_INIT to trigger setup 
+    if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
+        MYSQLD_INIT=${MYSQLD_INIT:=1}
+    fi
+    if [[ ! -z "$MYSQLD_INIT" ]]; then
+        mysql_init_install
+        mysql_init_start
+        mysql_init_check 
+        mysql_init_root 
+        mysql_init_tz 
+        mysql_init_scripts 
+        mysql_shutdown
+    fi
 }
 
 main 
