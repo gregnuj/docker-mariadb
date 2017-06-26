@@ -35,7 +35,6 @@ function replication_init_user(){
     echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
     echo "Created $REPLICATION_USERS_SQL"
 }
-W
 
 
 function replication_init_sql(){
