@@ -27,7 +27,7 @@ function replication_password(){
 }
 
 function replication_init_user(){
-    REPLICATION_USERS_SQL="/etc/initdb.d/users.sql"
+    REPLICATION_USERS_SQL="/etc/initdb.d/50-users.sql"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'%' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
@@ -35,7 +35,19 @@ function replication_init_user(){
     echo 'FLUSH PRIVILEGES ;' >> "$REPLICATION_USERS_SQL"
     echo "Created $REPLICATION_USERS_SQL"
 }
+W
 
+
+function replication_init_sql(){
+    REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
+    echo "CHANGE MASTER TO" >> "$REPLICATION_SQL"
+    echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SQL"
+    echo "MASTER_USER='$(replication_user)'," >> "$REPLICATION_SQL"
+    echo "MASTER_PASSWORD='$(replication_password)'," >> "$REPLICATION_SQL"
+    echo "MASTER_PORT=3306," >> "$REPLICATION_SQL"
+    echo "MASTER_CONNECT_RETRY=30;" >> "$REPLICATION_SQL"
+    echo "Created $REPLICATION_SQL"
+}
 
 function replication_init_cnf(){
     REPLICATION_CNF="$(replication_cnf)"
@@ -50,28 +62,29 @@ function replication_init_cnf(){
 }
 
 function replication_init_master(){
-    REPLICATION_CNF="$(replication_cnf)"
+    replication_init_cnf
+    replication_init_sql
+    replication_init_user
     echo "server_id=1" >> "$REPLICATION_CNF"
-    REPLICATION_MASTER_SQL="/etc/initdb.d/master.sql"
-    echo "Created $REPLICATION_MASTER_SQL"
+    echo "SELECT SLEEP(10);" >> "$REPLICATION_SQL"
+    echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
+    echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
 
 function replication_init_slave(){
-    REPLICATION_CNF="$(replication_cnf)"
+    replication_init_cnf
+    replication_init_sql
+    replication_init_user
     echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
-    REPLICATION_SLAVE_SQL="/etc/initdb.d/slave.sql"
-    echo "CHANGE MASTER TO" >> "$REPLICATION_SLAVE_SQL"
-    echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SLAVE_SQL"
-    echo "MASTER_USER='$(replication_user)'," >> "$REPLICATION_SLAVE_SQL"
-    echo "MASTER_PASSWORD='$(replication_password)'," >> "$REPLICATION_SLAVE_SQL"
-    echo "MASTER_PORT=3306," >> "$REPLICATION_SLAVE_SQL"
-    echo "MASTER_CONNECT_RETRY=10;" >> "$REPLICATION_SLAVE_SQL"
-    echo "START SLAVE;" >> "$REPLICATION_SLAVE_SQL"
-    echo "Created $REPLICATION_SLAVE_SQL"
+    echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
+    echo "START SLAVE;" >> "$REPLICATION_SQL"
+    echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
+    echo "SHOW MATER STATUS;" >> "$REPLICATION_SQL"
+    echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
 
 function replication_init_xtrabackup(){
-    REPLICATION_USERS_SQL="/etc/initdb.d/users.sql"
+    REPLICATION_USERS_SQL="/etc/initdb.d/50-users.sql"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     echo "CREATE USER IF NOT EXISTS '${REPLICATION_USER}'@'127.0.0.1' IDENTIFIED BY '${REPLICATION_PASSWORD}';" >> "$REPLICATION_USERS_SQL"
@@ -80,6 +93,7 @@ function replication_init_xtrabackup(){
     echo "GRANT RELOAD,LOCK TABLES,REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'localhost';" >> "$REPLICATION_USERS_SQL"
     source xtrabackup_cnf.sh
 }
+
 function main(){
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
@@ -88,15 +102,11 @@ function main(){
             ;;
         master)
             MASTER_INIT=1
-            replication_init_cnf
             replication_init_master
-            replication_init_user
             ;;
         slave)
             SLAVE_INIT=1
-            replication_init_cnf
             replication_init_slave
-            replication_init_user
             ;;
     esac
 }
