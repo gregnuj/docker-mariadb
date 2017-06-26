@@ -78,7 +78,7 @@ function replication_init_slave(){
     echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
     echo "START SLAVE;" >> "$REPLICATION_SQL"
     echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
-    echo "SHOW MATER STATUS;" >> "$REPLICATION_SQL"
+    echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
     echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
 
