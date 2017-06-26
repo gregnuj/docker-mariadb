@@ -64,7 +64,6 @@ function replication_init_master(){
     replication_init_sql
     replication_init_user
     echo "server_id=1" >> "$REPLICATION_CNF"
-    echo "SELECT SLEEP(10);" >> "$REPLICATION_SQL"
     echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
     echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
@@ -73,6 +72,7 @@ function replication_init_slave(){
     replication_init_cnf
     replication_init_sql
     replication_init_user
+    sleep 20 # wait for master
     echo "server_id=$(node_number)" >> "$REPLICATION_CNF"
     echo "SELECT SLEEP(5);" >> "$REPLICATION_SQL"
     echo "START SLAVE;" >> "$REPLICATION_SQL"
