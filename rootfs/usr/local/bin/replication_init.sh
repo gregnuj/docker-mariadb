@@ -51,6 +51,7 @@ function replication_init_sql(){
 function replication_init_cnf(){
     REPLICATION_CNF="$(replication_cnf)"
     echo "[mariadb]" >> "$REPLICATION_CNF"
+    echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
     echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
     echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
     echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
