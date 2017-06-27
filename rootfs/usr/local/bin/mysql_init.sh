@@ -168,7 +168,6 @@ function main(){
     fi
 
     if [[ ! -z "$MYSQLD_INIT" ]]; then
-        mysql_init_replication
         mysql_init_install
         mysql_init_start
         mysql_init_check 
@@ -180,6 +179,10 @@ function main(){
         mysql_shutdown
     fi
 
+    # replication needs to be configured every time the container is started
+    if [[ ! -z "$REPLICATION_METHOD" ]]; then
+        mysql_init_replication
+    fi
     #  recover galera/xtrabackup
     if [[ ! -z "${GALERA_INIT}" ]]; then
         if [[ -f "$(grastate_dat)" ]]; then
