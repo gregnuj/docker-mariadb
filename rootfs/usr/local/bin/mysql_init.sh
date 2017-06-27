@@ -113,21 +113,6 @@ function replication_init_user(){
 }
 
 
-function replication_init_cnf(){
-    SERVER_ID="$1"
-    REPLICATION_CNF="$(replication_cnf)"
-    echo "[mariadb]" >> "$REPLICATION_CNF"
-    echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
-    echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
-    echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
-    echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
-    echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
-    echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
-    echo "expire_logs_days=15" >> "$REPLICATION_CNF"
-    echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
-    echo "Created $REPLICATION_CNF"
-}
-
 function replication_init_master(){
     replication_init_cnf 1
     
@@ -157,6 +142,21 @@ function replication_init_slave(){
 
 function replication_init_xtrabackup(){
     source xtrabackup_cnf.sh
+}
+
+function replication_init_cnf(){
+    SERVER_ID="$1"
+    REPLICATION_CNF="$(replication_cnf)"
+    echo "[mariadb]" >> "$REPLICATION_CNF"
+    echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
+    echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
+    echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
+    echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
+    echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
+    echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
+    echo "expire_logs_days=15" >> "$REPLICATION_CNF"
+    echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
+    echo "Created $REPLICATION_CNF"
 }
 
 function mysql_init_scripts(){
