@@ -81,6 +81,7 @@ function mysql_init_user(){
 
 
 function replication_init(){
+    replication_init_user
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
