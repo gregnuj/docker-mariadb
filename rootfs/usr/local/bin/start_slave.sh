@@ -18,11 +18,10 @@ sql+=( "MASTER_PORT=3306," )
 sql+=( "MASTER_CONNECT_RETRY=30;" ) 
 sql+=( "START SLAVE;" )
 sql+=( "SELECT SLEEP(5);" )
+sql+=( "STOP SLAVE;" )
+sql+=( "MASTER_USE_GTID=current_pos" )
+sql+=( "START SLAVE;" )
 sql+=( "SHOW MASTER STATUS;" ) 
 sql+=( "SHOW SLAVE STATUS;" )
 echo "${sql[@]}" | "${mysql[@]}"
 
-sleep 5;
-sql=( "CHANGE MASTER TO" )
-sql+=( "MASTER_USE_GTID=current_pos" )
-echo "${sql[@]}" | "${mysql[@]}"
