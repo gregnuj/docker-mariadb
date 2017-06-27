@@ -194,7 +194,7 @@ function main(){
     fi
 
     if [[ ! -z "${SLAVE_INIT}" ]]; then
-       slave_start.sh &
+       start_slave.sh &
     fi
 }
 
