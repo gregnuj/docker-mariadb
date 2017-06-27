@@ -86,9 +86,11 @@ function replication_init(){
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
+            mysql_init_user 
             replication_init_xtrabackup
             ;;
         master)
+            mysql_init_user 
             replication_init_master
             ;;
         slave)
@@ -169,6 +171,8 @@ function main(){
     # Configure replication if requested
     if [[ ! -z "${REPLICATION_METHOD}" ]]; then
         replication_init
+    else
+        mysql_init_user 
     fi
 
     # Set env MYSQLD_INIT to trigger setup 
@@ -177,7 +181,6 @@ function main(){
     fi
 
     if [[ ! -z "$MYSQLD_INIT" ]]; then
-        mysql_init_user 
         mysql_init_database
         mysql_init_install
         mysql_init_start
