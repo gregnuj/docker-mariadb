@@ -106,7 +106,7 @@ function mysql_init_replication_user(){
     sql+=( "GRANT REPLICATION CLIENT ON *.* TO '${REPLICATION_USER}'@'%';" )
     sql+=( "GRANT REPLICATION SLAVE ON *.* TO '${REPLICATION_USER}'@'%';" )
     sql+=( "GRANT LOCK TABLES ON *.* TO '${REPLICATION_USER}'@'%';" )
-    sql+=( 'FLUSH PRIVILEGES ;' | "${mysql[@]}"
+    sql+=( 'FLUSH PRIVILEGES ;' 
     echo "${sql[@]}" | "${mysql[@]}"
 }
 
