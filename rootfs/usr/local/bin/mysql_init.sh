@@ -82,6 +82,7 @@ function mysql_init_user(){
 
 function replication_init(){
     replication_init_user
+    replication_init_cnf 
     case "${REPLICATION_METHOD}" in
         xtrabackup*)
             GALERA_INIT=1
@@ -114,17 +115,12 @@ function replication_init_user(){
 
 
 function replication_init_master(){
-    replication_init_cnf 1
-    
     REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
     echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
     echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
 }
 
 function replication_init_slave(){
-    sleep 20 # wait for master
-    replication_init_cnf $(node_number)
-
     REPLICATION_SQL="/etc/initdb.d/60-replication.sql"
     echo "CHANGE MASTER TO" >> "$REPLICATION_SQL"
     echo "MASTER_HOST='$(replication_master)'," >> "$REPLICATION_SQL"
@@ -138,6 +134,7 @@ function replication_init_slave(){
     echo "SHOW MASTER STATUS;" >> "$REPLICATION_SQL"
     echo "SHOW SLAVE STATUS;" >> "$REPLICATION_SQL"
     echo "Created $REPLICATION_SQL"
+    sleep 20 # wait for master
 }
 
 function replication_init_xtrabackup(){
@@ -145,7 +142,7 @@ function replication_init_xtrabackup(){
 }
 
 function replication_init_cnf(){
-    SERVER_ID="$1"
+    SERVER_ID="$(hostname -i | awk '{print $1}' | awk -F. '{print $4}')"
     REPLICATION_CNF="$(replication_cnf)"
     echo "[mariadb]" >> "$REPLICATION_CNF"
     echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
