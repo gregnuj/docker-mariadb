@@ -69,16 +69,35 @@ function mysql_init_database(){
 
 function mysql_init_user(){
     MYSQL_USERS_SQL="/etc/initdb.d/50-users.sql"
-    SERVICE_NAME="${SERVICE_NAME:="$(service_name)"}"
-    MYSQL_DATABASE="${MYSQL_DATABASE:="${SERVICE_NAME%-*}"}"
     MYSQL_USER="${MYSQL_USER:="${MYSQL_DATABASE}"}"
     MYSQL_PASSWORD="$(mysql_password $MYSQL_USER)"
     echo "CREATE USER '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' ;" >> "$MYSQL_USERS_SQL"
-    echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" >> "$MYSQL_USERS_SQL"
+    if [[ ! -z "$MYSQL_DATABASE" ]]; then
+        echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;" >> "$MYSQL_USERS_SQL"
+    fi
     echo 'FLUSH PRIVILEGES ;' >> "$MYSQL_USERS_SQL"
     echo "Created user $MYSQL_USER"
 }
 
+
+function replication_init(){
+    case "${REPLICATION_METHOD}" in
+        xtrabackup*)
+            GALERA_INIT=1
+            mysql_init_user 
+            mysql_init_database
+            replication_init_xtrabackup
+            ;;
+        master)
+            mysql_init_user 
+            mysql_init_database
+            replication_init_master
+            ;;
+        slave)
+            replication_init_slave
+            ;;
+    esac
+}
 
 function replication_init_user(){
     REPLICATION_USERS_SQL="/etc/initdb.d/50-users.sql"
@@ -153,30 +172,18 @@ function mysql_init_scripts(){
 }
 
 function main(){
-    case "${REPLICATION_METHOD}" in
-        xtrabackup*)
-            GALERA_INIT=1
-            mysql_init_user 
-            mysql_init_database
-            replication_init_xtrabackup
-            ;;
-        master)
-            mysql_init_user 
-            mysql_init_database
-            replication_init_master
-            ;;
-        slave)
-            replication_init_slave
-            ;;
-        *)
-            mysql_init_user 
-            mysql_init_database
-            ;;
-    esac
+    if [[ ! -z "${REPLICATION_METHOD}" ]]; then
+        replication_init
+    else
+        mysql_init_user 
+        mysql_init_database
+    fi
+
     # Set env MYSQLD_INIT to trigger setup 
     if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
         MYSQLD_INIT=${MYSQLD_INIT:=1}
     fi
+
     if [[ ! -z "$MYSQLD_INIT" ]]; then
         mysql_init_install
         mysql_init_start
@@ -185,6 +192,19 @@ function main(){
         mysql_init_tz 
         mysql_init_scripts 
         mysql_shutdown
+    fi
+
+    #  recover galera/xtrabackup
+    if [[ ! -z "${GALERA_INIT}" ]]; then
+        if [[ -f "$(grastate_dat)" ]]; then
+            mysqld ${cmd[@]:1} --wsrep-recover
+        fi
+        if [[ ! -z $(is_primary_component) ]]; then
+            if [[ -f "$(grastate_dat)" ]]; then
+                sed -i -e 's/^safe_to_bootstrap: *0/safe_to_bootstrap: 1/' $(grastate_dat)
+            fi
+            cmd+=( " --wsrep-new-cluster" )
+        fi
     fi
 }
 
