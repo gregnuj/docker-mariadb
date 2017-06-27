@@ -118,9 +118,11 @@ function mysql_init_replication(){
             mysql_init_xtrabackup_cnf
             ;;
         master)
+            MASTER_INIT=1
             mysql_init_replication_cnf 
             ;;
         slave)
+            SLAVE_INIT=1
             mysql_init_replication_cnf 
             ;;
     esac
