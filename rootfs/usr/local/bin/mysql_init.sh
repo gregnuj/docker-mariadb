@@ -140,11 +140,14 @@ function mysql_init_replication_cnf(){
     echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
     echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
     echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
-    echo "binlog-do-db=${APP_NAME}" >> "$REPLICATION_CNF"
     echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
     echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
     echo "expire_logs_days=15" >> "$REPLICATION_CNF"
     echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
+    if [[ ! -z "$MYSQL_DATABASE" ]]; then
+        echo "binlog-do-db=${$MYSQL_DATABASE}" >> "$REPLICATION_CNF"
+        echo "replicate-do-db=${$MYSQL_DATABASE}" >> "$REPLICATION_CNF"
+    fi
 }
 
 function mysql_init_scripts(){
