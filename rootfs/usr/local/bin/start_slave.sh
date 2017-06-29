@@ -18,7 +18,7 @@ sql+=( "MASTER_USE_GTID=current_pos," )
 sql+=( "MASTER_PORT=3306," )
 sql+=( "MASTER_CONNECT_RETRY=30;" ) 
 sql+=( "START SLAVE;" )
-sql+=( "SHOW MASTER STATUS;" ) 
-sql+=( "SHOW SLAVE STATUS;" )
+sql+=( "SHOW MASTER STATUS\G;" ) 
+sql+=( "SHOW SLAVE STATUS\G;" )
 echo "${sql[@]}" | "${mysql[@]}"
 
