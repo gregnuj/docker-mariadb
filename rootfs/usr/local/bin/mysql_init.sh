@@ -148,6 +148,8 @@ function mysql_init_replication_cnf(){
         echo "binlog-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
         echo "replicate-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
     fi
+    echo "slave-parallel-threads=4" >> "$REPLICATION_CNF"
+    echo "slave-parallel-mode=optimistic" >> "$REPLICATION_CNF"
 }
 
 function mysql_init_scripts(){
