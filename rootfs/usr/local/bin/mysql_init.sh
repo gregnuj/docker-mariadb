@@ -72,7 +72,7 @@ function mysql_init_database(){
 }
 
 function mysql_init_users(){
-    case "${REPLICATION_METHOD}" in
+    case ${REPLICATION_METHOD} in
         master)
             mysql_init_user
             mysql_init_replication_user
@@ -112,8 +112,8 @@ function mysql_init_replication_user(){
 
 
 function mysql_init_replication(){
-    case "${REPLICATION_METHOD}" in
-        xtrabackup*)
+    case ${REPLICATION_METHOD} in
+        galera|xtrabackup*)
             GALERA_INIT=1
             mysql_init_xtrabackup_cnf
             ;;
