@@ -17,15 +17,6 @@ function node_address(){
     echo "$NODE_ADDRESS"
 }
 
-# only use for /24 (or smaller) subnets
-function node_number(){
-    if [[ -z "" ]]; then
-        NODE_ADDRESS="$(node_address)"
-        NODE_NUMBER="${NODE_ADDRESS##*.}"
-    fi
-    echo "$NODE_NUMBER"
-}
-
 function fqdn(){
     while [[ -z "$FQDN" && $LOOP -lt 30 ]] ; do
         FQDN="$(nslookup "$(node_address)" | awk -F'= ' 'NR==5 { print $2 }')"
@@ -88,9 +79,6 @@ function main(){
             ;;
         -h|--hostname)
 	    echo "$(service_hostname)"
-            ;;
-        -n|--number)
-	    echo "$(node_number)"
             ;;
         -s|--service)
 	    echo "$(service_name)"
