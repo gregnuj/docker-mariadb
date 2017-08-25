@@ -35,7 +35,7 @@ wsrep_node_address=$(wsrep_node_address)
 wsrep-cluster-name=$(wsrep_cluster_name)
 wsrep-cluster-address=$(wsrep_cluster_address)
 #wsrep-max-ws-size=1024K
-wsrep_slave_threads=10
+wsrep_slave_threads=8
 
 wsrep_sst_method=$(wsrep_sst_method)
 wsrep-sst-auth=$(wsrep_sst_auth)
