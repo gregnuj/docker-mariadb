@@ -10,7 +10,8 @@ fi
 sleep 5;
 echo "Starting slave replication"
 mysql=( $(mysql_client) )
-sql=( "CHANGE MASTER TO" )
+sql=( "STOP SLAVE;" )
+sql+=( "CHANGE MASTER TO" )
 sql+=( "MASTER_HOST='$(replication_master)'," )
 sql+=( "MASTER_USER='$(replication_user)'," )
 sql+=( "MASTER_PASSWORD='$(replication_password)'," )
