@@ -143,10 +143,10 @@ function mysql_init_replication_cnf(){
     echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
     echo "expire_logs_days=15" >> "$REPLICATION_CNF"
     echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
-    if [[ ! -z "${MYSQL_DATABASE}" ]]; then
-        echo "binlog-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
-        echo "replicate-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
-    fi
+    #if [[ ! -z "${MYSQL_DATABASE}" ]]; then
+        #echo "binlog-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
+        #echo "replicate-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
+    #fi
     echo "slave-parallel-threads=4" >> "$REPLICATION_CNF"
     echo "slave-parallel-mode=optimistic" >> "$REPLICATION_CNF"
 }
