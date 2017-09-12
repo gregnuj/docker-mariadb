@@ -1,7 +1,6 @@
-FROM mariadb:10.1
+FROM mariadb:10.2
 
 LABEL MAINTAINER="Greg Junge <gregnuj@gmail.com>"
-
 
 RUN set -e \
     && apt-get update \
