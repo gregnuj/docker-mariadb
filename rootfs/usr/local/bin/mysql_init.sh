@@ -78,7 +78,6 @@ function mysql_init_users(){
             mysql_init_replication_user
             ;;
         slave)
-            mysql_init_replication_user
             ;;
         *)
             mysql_init_user
