@@ -112,9 +112,13 @@ function mysql_init_replication_user(){
 
 function mysql_init_replication(){
     case ${REPLICATION_METHOD} in
-        galera|xtrabackup*)
+        xtrabackup*)
             GALERA_INIT=1
-            mysql_init_xtrabackup_cnf
+            source xtrabackup_cnf.sh
+            ;;
+        rsync)
+            GALERA_INIT=1
+            source rsync_cnf.sh
             ;;
         master)
             MASTER_INIT=1
@@ -125,10 +129,6 @@ function mysql_init_replication(){
             mysql_init_replication_cnf 
             ;;
     esac
-}
-
-function mysql_init_xtrabackup_cnf(){
-    source xtrabackup_cnf.sh
 }
 
 function mysql_init_replication_cnf(){
@@ -187,7 +187,7 @@ function main(){
     if [[ ! -z "$REPLICATION_METHOD" ]]; then
         mysql_init_replication
     fi
-    #  recover galera/xtrabackup
+    #  recover galera/galera
     if [[ ! -z "${GALERA_INIT}" ]]; then
         if [[ -f "$(grastate_dat)" ]]; then
             mysqld ${cmd[@]:1} --wsrep-recover

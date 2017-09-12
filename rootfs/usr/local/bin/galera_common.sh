@@ -99,7 +99,7 @@ function wsrep_pc_weight(){
 
 #
 function wsrep_sst_method(){
-    WSREP_SST_METHOD="${WSREP_SST_METHOD:="xtrabackup-v2"}"
+    WSREP_SST_METHOD="${WSREP_SST_METHOD:="rsync"}"
     echo "${WSREP_SST_METHOD}"
 }
 
