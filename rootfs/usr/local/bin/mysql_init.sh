@@ -182,15 +182,15 @@ function main(){
     fi
     #  recover galera/galera
     if [[ ! -z "${GALERA_INIT}" ]]; then
-        if [[ -f "$(grastate_dat)" ]]; then
-            mysqld ${cmd[@]:1} --wsrep-recover
-        fi
-        if [[ ! -z $(is_primary_component) ]]; then
-            if [[ -f "$(grastate_dat)" ]]; then
-                sed -i -e 's/^safe_to_bootstrap: *0/safe_to_bootstrap: 1/' $(grastate_dat)
-            fi
-            set -- "$@" "--wsrep-new-cluster"
-        fi
+        #if [[ -f "$(grastate_dat)" ]]; then
+        #    mysqld ${cmd[@]:1} --wsrep-recover
+        #fi
+        #if [[ ! -z $(is_primary_component) ]]; then
+        #    if [[ -f "$(grastate_dat)" ]]; then
+        #        sed -i -e 's/^safe_to_bootstrap: *0/safe_to_bootstrap: 1/' $(grastate_dat)
+        #    if
+        #    set -- "$@" "--wsrep-new-cluster"
+        #fi
     fi
 
     if [[ ! -z "${SLAVE_INIT}" ]]; then
