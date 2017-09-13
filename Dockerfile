@@ -7,7 +7,7 @@ RUN set -e \
     && apt-get install -y \
     --no-install-recommends \
     --no-install-suggests \
-    vim dnsutils curl \
+    dnsutils curl vim \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /etc/initdb.d  \
