@@ -73,14 +73,11 @@ function mysql_init_database(){
 
 function mysql_init_users(){
     case ${REPLICATION_METHOD} in
-        master)
-            mysql_init_user
-            mysql_init_replication_user
-            ;;
         slave)
             ;;
         *)
             mysql_init_user
+            mysql_init_replication_user
             ;;
     esac
 }
