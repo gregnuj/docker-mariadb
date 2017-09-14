@@ -121,6 +121,7 @@ function mysql_init_do(){
     echo "${MYSQLD_INIT}"
 }
 
+
 function main(){
     if [[ ! -z "$(mysql_init_do)" ]]; then
         mysql_init_install

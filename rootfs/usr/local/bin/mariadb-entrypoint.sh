@@ -34,6 +34,12 @@ if [[ "$(id -u)" = '0' ]]; then
     exec gosu mysql "$BASH_SOURCE" "$@"
 fi
 
+# init database
 source mysql_init.sh
 
-exec ${cmd[*]} 2>&1
+# Galera primary component container
+if [ -f $(grastate_dat) -a -n $SAFE_TO_BOOTSTRAP ]; then
+   sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 1/" $GRASTATE_DAT
+fi
+
+exec "$@"

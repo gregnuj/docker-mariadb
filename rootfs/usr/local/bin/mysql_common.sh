@@ -2,15 +2,20 @@
 
 [[ -z "$DEBUG" ]] || set -x
 
-
 function mysql_datadir(){
     DATADIR="${DATADIR:="/var/lib/mysql"}"
     echo "$DATADIR"
 }
 
+function grastate_dat(){
+    GRASTATE_DAT="{$GRASTATE_DAT:="$(mysql_datadir)/grastate.dat"}"
+    echo "${GRASTATE_DAT}"
+}
+
 function mysql_confd(){
+    MYSQL_CONFD="{$MYSQL_CONFD:=/etc/mysql/conf.d}"
     mkdir -p "${MYSQL_CONFD}"
-    echo "$MYSQL_CONFD"
+    echo "${MYSQL_CONFD}"
 }
 
 function mysql_user(){
