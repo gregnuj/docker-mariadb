@@ -9,10 +9,6 @@ if [[ -n "$DEBUG" ]]; then
 fi
 
 declare WANTHELP=$(echo "$@" | grep '\(-?\|--help\|--print-defaults\|-V\|--version\)')
-declare -a cmd=( "$*" )
-
-# Create/Modify config files based on env
-source "config_editor.sh"
 
 # if command starts with an option, prepend mysqld
 if [[ "${1:0:1}" = '-' ]]; then
