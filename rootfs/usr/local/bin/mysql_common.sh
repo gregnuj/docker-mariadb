@@ -2,10 +2,9 @@
 
 [[ -z "$DEBUG" ]] || set -x
 
-declare MYSQL_CONFD="${MYSQL_CONFD:="/etc/mysql/conf.d"}"
-declare DATADIR="${DATADIR:="/var/lib/mysql"}"
 
 function mysql_datadir(){
+    DATADIR="${DATADIR:="/var/lib/mysql"}"
     echo "$DATADIR"
 }
 
@@ -58,17 +57,6 @@ function mysql_client(){
     MYSQL_CLIENT+=( "-u$(mysql_user root)" )
     MYSQL_CLIENT+=( "-p$(mysql_password root)" )
     echo "${MYSQL_CLIENT[@]}"
-}
-
-# Defaults to replication.cnf
-function replication_cnf(){
-    REPLICATION_CNF="${REPLICATION_CNF:="$(mysql_confd)/replication.cnf"}"
-    echo "${REPLICATION_CNF}"
-}
-
-function replication_master(){
-    REPLICATION_MASTER="${REPLICATION_MASTER:="master"}"
-    echo "$REPLICATION_MASTER"
 }
 
 function replication_user(){

@@ -72,10 +72,8 @@ function mysql_init_database(){
 }
 
 function mysql_init_users(){
-    if [[ "${REPLICATION_METHOD}" != "slave" ]]; then
-        mysql_init_user
-        mysql_init_replication_user
-    fi
+    mysql_init_user
+    mysql_init_replication_user
 }
 
 function mysql_init_user(){
@@ -103,47 +101,6 @@ function mysql_init_replication_user(){
 }
 
 
-function mysql_init_replication(){
-    case ${REPLICATION_METHOD} in
-        xtrabackup*)
-            GALERA_INIT=1
-            source xtrabackup_cnf.sh
-            ;;
-        rsync)
-            GALERA_INIT=1
-            source rsync_cnf.sh
-            ;;
-        master)
-            MASTER_INIT=1
-            mysql_init_replication_cnf 
-            ;;
-        slave)
-            SLAVE_INIT=1
-            mysql_init_replication_cnf 
-            ;;
-    esac
-}
-
-function mysql_init_replication_cnf(){
-    REPLICATION_CNF="$(replication_cnf)"
-    echo "Creating $REPLICATION_CNF"
-    SERVER_ID="$(hostname -i | awk '{print $1}' | awk -F. '{print $4}')"
-    echo "[mariadb]" >> "$REPLICATION_CNF"
-    echo "server_id=${SERVER_ID}" >> "$REPLICATION_CNF"
-    echo "skip-name-resolve=0" >> "$REPLICATION_CNF"
-    echo "log-bin=mysql-bin" >> "$REPLICATION_CNF"
-    echo "relay-log=mysql-relay-bin" >> "$REPLICATION_CNF"
-    echo "relay-log-index=mysql-relay-bin.index" >> "$REPLICATION_CNF"
-    echo "expire_logs_days=15" >> "$REPLICATION_CNF"
-    echo "max_binlog_size=512M" >> "$REPLICATION_CNF"
-    #if [[ ! -z "${MYSQL_DATABASE}" ]]; then
-        #echo "binlog-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
-        #echo "replicate-do-db=${MYSQL_DATABASE}" >> "$REPLICATION_CNF"
-    #fi
-    echo "slave-parallel-threads=4" >> "$REPLICATION_CNF"
-    echo "slave-parallel-mode=optimistic" >> "$REPLICATION_CNF"
-}
-
 function mysql_init_scripts(){
     mysql=( $(mysql_client) )
     for f in /etc/initdb.d/*; do
@@ -157,14 +114,15 @@ function mysql_init_scripts(){
     done
 }
 
-function main(){
-
-    # Set env MYSQLD_INIT to trigger setup 
+function mysql_init_do(){
     if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
         MYSQLD_INIT=${MYSQLD_INIT:=1}
     fi
+    echo "${MYSQLD_INIT}"
+}
 
-    if [[ ! -z "$MYSQLD_INIT" ]]; then
+function main(){
+    if [[ ! -z "$(mysql_init_do)" ]]; then
         mysql_init_install
         mysql_init_start
         mysql_init_check 
@@ -174,26 +132,6 @@ function main(){
         mysql_init_users
         mysql_init_scripts 
         mysql_shutdown
-    fi
-
-    # replication needs to be configured every time the container is started
-    if [[ ! -z "$REPLICATION_METHOD" ]]; then
-        mysql_init_replication
-    fi
-    #  recover galera/galera
-    #if [[ ! -z "${GALERA_INIT}" ]]; then
-        #if [[ -f "$(grastate_dat)" ]]; then
-        #    mysqld ${cmd[@]:1} --wsrep-recover
-        #fi
-        #if [[ ! -z $(is_primary_component) ]]; then
-            #if [[ ! -f "$(grastate_dat)" ]]; then
-                #set -- "$@" "--wsrep-new-cluster"
-            #fi
-        #fi
-    #fi
-
-    if [[ ! -z "${SLAVE_INIT}" ]]; then
-       start_slave.sh &
     fi
 }
 
