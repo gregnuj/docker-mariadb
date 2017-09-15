@@ -24,6 +24,9 @@ RUN set -e \
 # 4568: Incremental State Transfer
 EXPOSE 3306 4444 4567 4567/udp 4568
 
+# create rsync_wan sst method
+RUN cp -p /usr/bin/wsrep_sst_rsync /usr/bin/wsrep_sst_rsync_wan
+
 COPY rootfs/ /
 
 ENTRYPOINT ["/usr/local/bin/mariadb-entrypoint.sh"]
