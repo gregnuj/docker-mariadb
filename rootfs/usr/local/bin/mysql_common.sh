@@ -8,7 +8,7 @@ function mysql_datadir(){
 }
 
 function grastate_dat(){
-    GRASTATE_DAT="{$GRASTATE_DAT:="$(mysql_datadir)/grastate.dat"}"
+    GRASTATE_DAT="${GRASTATE_DAT:="$(mysql_datadir)/grastate.dat"}"
     echo "${GRASTATE_DAT}"
 }
 
