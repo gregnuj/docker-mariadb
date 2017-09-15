@@ -37,9 +37,9 @@ source mysql_init.sh
 # Galera primary component container
 if [ -f "$(grastate_dat)" ]; then 
    if [ -n "${SAFE_TO_BOOTSTRAP}" ]; then
-       sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 1/" $GRASTATE_DAT
+       sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 1/" $(grastate_dat) 
    else
-       sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 0/" $GRASTATE_DAT
+       sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 0/" $(grastate_dat)
    fi
 fi
 
