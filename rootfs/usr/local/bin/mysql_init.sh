@@ -114,13 +114,55 @@ function mysql_init_scripts(){
     done
 }
 
+
+function mysql_init_bootstrap(){
+    # Galera primary component container
+    if [ -f "$(grastate_dat)" ]; then 
+       if [ -n "${SAFE_TO_BOOTSTRAP}" ]; then
+           sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 1/" $(grastate_dat) 
+       else
+           sed -i "s/safe_to_bootstrap:.*/safe_to_bootstrap: 0/" $(grastate_dat)
+       fi
+    fi
+}
+
+function mysql_init_replication(){
+    REPLICATION_USER="$(replication_user)"
+    REPLICATION_PASSWORD="$(replication_password)"
+    mysql=( $(mysql_client) )
+    sql=( "STOP SLAVE;\n" )
+    sql+=( "CHANGE MASTER TO" )
+    sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
+    sql+=( "MASTER_USER='$(replication_user)'," )
+    sql+=( "MASTER_PASSWORD='$(replication_password)'," )
+    sql+=( "MASTER_USE_GTID=current_pos," )
+    sql+=( "MASTER_PORT=3306," )
+    sql+=( "MASTER_CONNECT_RETRY=30;\n" )
+    sql+=( "START SLAVE;" )
+    sql+=( "SHOW MASTER STATUS\G;\n" )
+    sql+=( "SHOW SLAVE STATUS\G;\n" )
+    echo "${sql[@]}"
+}
+
+function mysql_init_file(){
+    MYSQL_INIT_FILE="${MYSQL_INIT_FILE:="/tmp/mysql_init_file.sql"}"
+    echo "${MYSQL_INIT_FILE}"
+}
+
+function mysql_init_sql(){
+    MYSQL_INIT_FILE="$(mysql_init_file)"
+    : > ${MYSQL_INIT_FILE}
+    if [[ ! -z "${REPLICATION_MASTER}" ]]; then
+    	echo $(mysql_init_replication) >> ${MYSQL_INIT_FILE}
+    fi
+}
+
 function mysql_init_do(){
     if [[ ! -d "$(mysql_datadir)/mysql" ]]; then
         MYSQLD_INIT=${MYSQLD_INIT:=1}
     fi
     echo "${MYSQLD_INIT}"
 }
-
 
 function main(){
     if [[ ! -z "$(mysql_init_do)" ]]; then
@@ -133,6 +175,8 @@ function main(){
         mysql_init_users
         mysql_init_scripts 
         mysql_shutdown
+        mysql_init_bootstrap;
+        mysql_init_sql
     fi
 }
 
