@@ -131,8 +131,9 @@ function mysql_init_replication(){
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     mysql=( $(mysql_client) )
-    sql=( "SET GLOBAL server_id=${SERVER_ID};\n" )
-    sql+=( "STOP SLAVE;\n" )
+    sql=( "STOP SLAVE;\n" )
+    sql+=( "SET GLOBAL server_id=${SERVER_ID};\n" )
+    sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';\n" )
     sql+=( "CHANGE MASTER TO" )
     sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
     sql+=( "MASTER_USER='$(replication_user)'," )
