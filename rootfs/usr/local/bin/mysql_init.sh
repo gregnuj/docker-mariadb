@@ -137,8 +137,8 @@ function mysql_init_replication(){
     sql+=( "MASTER_PORT=3306," )
     sql+=( "MASTER_CONNECT_RETRY=30;" )
     sql+=( "START SLAVE;" )
-    sql+=( "SHOW MASTER STATUS\G;" )
-    sql+=( "SHOW SLAVE STATUS\G;" )
+    sql+=( "SHOW MASTER STATUS\G" )
+    sql+=( "SHOW SLAVE STATUS\G" )
     echo "${sql[@]}"
 }
 
@@ -151,7 +151,7 @@ function mysql_init_sql(){
     MYSQL_INIT_FILE="$(mysql_init_file)"
     : > ${MYSQL_INIT_FILE}
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
-    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/' >> ${MYSQL_INIT_FILE}
+    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/g' >> ${MYSQL_INIT_FILE}
     fi
 }
 
