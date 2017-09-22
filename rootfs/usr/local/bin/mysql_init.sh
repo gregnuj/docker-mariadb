@@ -174,9 +174,9 @@ function main(){
         mysql_init_replication_user
         mysql_init_scripts 
         mysql_shutdown
-        mysql_init_bootstrap;
-        mysql_init_sql
     fi
+    mysql_init_bootstrap;
+    mysql_init_sql
 }
 
 main 
