@@ -71,11 +71,6 @@ function mysql_init_database(){
     fi
 }
 
-function mysql_init_users(){
-    mysql_init_user
-    mysql_init_replication_user
-}
-
 function mysql_init_user(){
     mysql=( $(mysql_client) )
     MYSQL_USER="${MYSQL_USER:="${MYSQL_DATABASE}"}"
@@ -148,7 +143,7 @@ function mysql_init_replication(){
 }
 
 function mysql_init_file(){
-    MYSQL_INIT_FILE="${MYSQL_INIT_FILE:="/tmp/mysql_init_file.sql"}"
+    MYSQL_INIT_FILE="${MYSQL_INIT_FILE:="/etc/mysql/mysql_init_file.sql"}"
     echo "${MYSQL_INIT_FILE}"
 }
 
@@ -175,7 +170,8 @@ function main(){
         mysql_init_root 
         mysql_init_tz 
         mysql_init_database
-        mysql_init_users
+        mysql_init_user
+        mysql_init_replication_user
         mysql_init_scripts 
         mysql_shutdown
         mysql_init_bootstrap;
