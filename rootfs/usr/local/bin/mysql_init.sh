@@ -151,7 +151,7 @@ function mysql_init_sql(){
     MYSQL_INIT_FILE="$(mysql_init_file)"
     : > ${MYSQL_INIT_FILE}
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
-    	echo "$(mysql_init_replication)" >> ${MYSQL_INIT_FILE}
+    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/' >> ${MYSQL_INIT_FILE}
     fi
 }
 
