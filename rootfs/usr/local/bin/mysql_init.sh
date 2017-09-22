@@ -126,8 +126,8 @@ function mysql_init_replication(){
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     mysql=( $(mysql_client) )
-    sql=( "STOP SLAVE;\n" )
-    sql+=( "SET GLOBAL server_id=${SERVER_ID};\n" )
+    sql=( "STOP SLAVE;" )
+    sql+=( "SET GLOBAL server_id=${SERVER_ID};" )
     sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';\n" )
     sql+=( "CHANGE MASTER TO" )
     sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
@@ -135,10 +135,10 @@ function mysql_init_replication(){
     sql+=( "MASTER_PASSWORD='$(replication_password)'," )
     sql+=( "MASTER_USE_GTID=current_pos," )
     sql+=( "MASTER_PORT=3306," )
-    sql+=( "MASTER_CONNECT_RETRY=30;\n" )
+    sql+=( "MASTER_CONNECT_RETRY=30;" )
     sql+=( "START SLAVE;" )
-    sql+=( "SHOW MASTER STATUS\G;\n" )
-    sql+=( "SHOW SLAVE STATUS\G;\n" )
+    sql+=( "SHOW MASTER STATUS\G;" )
+    sql+=( "SHOW SLAVE STATUS\G;" )
     echo "${sql[@]}"
 }
 
