@@ -9,18 +9,18 @@ if [[ -n "$DEBUG" ]]; then
 fi
 
 # capture parameters
-declare -a cmd=( "$*" )
+declare -a cmd=( "$@" )
 
 # Check for help options
-declare WANTHELP=$(echo "$@" | grep '\(-?\|--help\|--print-defaults\|-V\|--version\)')
+declare WANTHELP=$(echo "${cmd[@]}" | grep '\(-?\|--help\|--print-defaults\|-V\|--version\)')
 
 # if command starts with an option, prepend mysqld
-if [[ "${1:0:1}" = '-' ]]; then
+if [[ "${cmd[1]:0:1}" == "-" ]]; then
     set -- mysqld "${cmd[@]}"
 fi
 
 # command is not mysqld 
-if [[ $1 != 'mysqld' && $1 != 'mysqld_safe' ]]; then
+if [[ "${cmd[1]}" != "mysqld" && "${cmd[1]}" != "mysqld_safe" ]]; then
     exec "${cmd[@]}"
 fi
 
@@ -30,7 +30,7 @@ if [[ ! -z "$WANTHELP" ]]; then
 fi
 
 # allow the container to be started with `--user`
-if [[ "$(id -u)" = '0' ]]; then
+if [[ "$(id -u)" == 0 ]]; then
     exec gosu mysql "$BASH_SOURCE" "${cmd[@]}"
 fi
 
@@ -38,7 +38,7 @@ fi
 source mysql_init.sh
 
 # add sql init file, if no other is defined
-if [[ $(echo "$@" | grep -v '\(--init-file\)') ]]; then
+if [[ $(echo "${cmd[@]}" | grep -v '\(--init-file\)') ]]; then
     cmd+=( "--init-file" "$(mysql_init_file)" )
 fi
 
