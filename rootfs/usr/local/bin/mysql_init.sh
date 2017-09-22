@@ -125,7 +125,6 @@ function mysql_init_replication(){
     SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
-    mysql=( $(mysql_client) )
     sql=( "STOP SLAVE;" )
     sql+=( "SET GLOBAL server_id=${SERVER_ID};" )
     sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';" )
@@ -151,7 +150,7 @@ function mysql_init_sql(){
     MYSQL_INIT_FILE="$(mysql_init_file)"
     : > ${MYSQL_INIT_FILE}
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
-    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/g' >> ${MYSQL_INIT_FILE}
+    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/g' -e 's/\\G/&\n/g' >> ${MYSQL_INIT_FILE}
     fi
 }
 
