@@ -15,12 +15,12 @@ declare -a cmd=( "$@" )
 declare WANTHELP=$(echo "${cmd[@]}" | grep '\(-?\|--help\|--print-defaults\|-V\|--version\)')
 
 # if command starts with an option, prepend mysqld
-if [[ "${cmd[1]:0:1}" == "-" ]]; then
+if [[ "${cmd[0]:0:1}" == "-" ]]; then
     set -- mysqld "${cmd[@]}"
 fi
 
 # command is not mysqld 
-if [[ "${cmd[1]}" != "mysqld" && "${cmd[1]}" != "mysqld_safe" ]]; then
+if [[ "${cmd[0]}" != "mysqld" && "${cmd[0]}" != "mysqld_safe" ]]; then
     exec "${cmd[@]}"
 fi
 
