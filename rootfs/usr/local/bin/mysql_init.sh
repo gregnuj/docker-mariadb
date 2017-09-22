@@ -127,10 +127,12 @@ function mysql_init_bootstrap(){
 }
 
 function mysql_init_replication(){
+    SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
     REPLICATION_USER="$(replication_user)"
     REPLICATION_PASSWORD="$(replication_password)"
     mysql=( $(mysql_client) )
-    sql=( "STOP SLAVE;\n" )
+    sql=( "SET GLOBAL server_id=${SERVER_ID};\n" )
+    sql+=( "STOP SLAVE;\n" )
     sql+=( "CHANGE MASTER TO" )
     sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
     sql+=( "MASTER_USER='$(replication_user)'," )
