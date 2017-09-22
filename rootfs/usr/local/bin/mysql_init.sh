@@ -128,7 +128,7 @@ function mysql_init_replication(){
     mysql=( $(mysql_client) )
     sql=( "STOP SLAVE;" )
     sql+=( "SET GLOBAL server_id=${SERVER_ID};" )
-    sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';\n" )
+    sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';" )
     sql+=( "CHANGE MASTER TO" )
     sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
     sql+=( "MASTER_USER='$(replication_user)'," )
@@ -151,7 +151,7 @@ function mysql_init_sql(){
     MYSQL_INIT_FILE="$(mysql_init_file)"
     : > ${MYSQL_INIT_FILE}
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
-    	echo $(mysql_init_replication) >> ${MYSQL_INIT_FILE}
+    	echo "$(mysql_init_replication)" >> ${MYSQL_INIT_FILE}
     fi
 }
 
