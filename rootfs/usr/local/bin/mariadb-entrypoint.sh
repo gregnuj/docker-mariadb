@@ -38,8 +38,10 @@ fi
 source mysql_init.sh
 
 # add sql init file, if no other is defined
-if [[ $(echo "${cmd[@]}" | grep -v '\(--init-file\)') ]]; then
-    cmd+=( "--init-file=$(mysql_init_file)" )
+if [[ -f "$(mysql_init_file)" ]]; then
+    if [[ $(echo "${cmd[@]}" | grep -v '\(--init-file\)') ]]; then
+        cmd+=( "--init-file=$(mysql_init_file)" )
+    fi
 fi
 
 exec "${cmd[@]}"
