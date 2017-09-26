@@ -132,7 +132,7 @@ function mysql_init_replication(){
     sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
     sql+=( "MASTER_USER='$(replication_user)'," )
     sql+=( "MASTER_PASSWORD='$(replication_password)'," )
-    sql+=( "MASTER_USE_GTID=current_pos," )
+    sql+=( "MASTER_USE_GTID=slave_pos," )
     sql+=( "MASTER_PORT=3306," )
     sql+=( "MASTER_CONNECT_RETRY=30;" )
     sql+=( "START SLAVE;" )
