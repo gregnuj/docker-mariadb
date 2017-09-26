@@ -122,23 +122,23 @@ function mysql_init_bootstrap(){
 }
 
 function mysql_init_replication(){
-    SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
-    REPLICATION_USER="$(replication_user)"
-    REPLICATION_PASSWORD="$(replication_password)"
-    sql=( "STOP SLAVE;" )
-    sql+=( "SET GLOBAL server_id=${SERVER_ID};" )
-    sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';" )
-    sql+=( "CHANGE MASTER TO" )
-    sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
-    sql+=( "MASTER_USER='$(replication_user)'," )
-    sql+=( "MASTER_PASSWORD='$(replication_password)'," )
-    sql+=( "MASTER_USE_GTID=current_pos," )
-    sql+=( "MASTER_PORT=3306," )
-    sql+=( "MASTER_CONNECT_RETRY=30;" )
-    sql+=( "START SLAVE;" )
-    sql+=( "SHOW MASTER STATUS\G" )
-    sql+=( "SHOW SLAVE STATUS\G" )
-    echo "${sql[@]}"
+    if [[ ! -z "${REPLICATION_MASTER}" ]]; then
+        mysql=( $(mysql_client) )
+        SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
+        REPLICATION_USER="$(replication_user)"
+        REPLICATION_PASSWORD="$(replication_password)"
+        sql=( "SET GLOBAL server_id=${SERVER_ID};" )
+        sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';" )
+        sql+=( "CHANGE MASTER TO" )
+        sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
+        sql+=( "MASTER_USER='$(replication_user)'," )
+        sql+=( "MASTER_PASSWORD='$(replication_password)'," )
+        sql+=( "MASTER_USE_GTID=current_pos," )
+        sql+=( "MASTER_PORT=3306," )
+        sql+=( "MASTER_CONNECT_RETRY=30;" )
+        sql+=( "START SLAVE;" )
+        echo "${sql[@]}" | "${mysql[@]}"
+    fi
 }
 
 function mysql_init_file(){
@@ -149,9 +149,6 @@ function mysql_init_file(){
 function mysql_init_sql(){
     MYSQL_INIT_FILE="$(mysql_init_file)"
     : > ${MYSQL_INIT_FILE}
-    if [[ ! -z "${REPLICATION_MASTER}" ]]; then
-    	echo "$(mysql_init_replication)" | sed -e 's/;/&\n/g' -e 's/\\G/&\n/g' >> ${MYSQL_INIT_FILE}
-    fi
 }
 
 function mysql_init_do(){
@@ -171,11 +168,11 @@ function main(){
         mysql_init_database
         mysql_init_user
         mysql_init_replication_user
+        mysql_init_replication
         mysql_init_scripts 
         mysql_shutdown
     fi
     mysql_init_bootstrap;
-    mysql_init_sql
 }
 
 main 
