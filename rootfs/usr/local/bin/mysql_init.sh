@@ -126,9 +126,9 @@ function mysql_init_replication(){
         SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
         REPLICATION_USER="$(replication_user)"
         REPLICATION_PASSWORD="$(replication_password)"
-        sql=( "SET GLOBAL server_id=${SERVER_ID};" )
+        sql=( "STOP SLAVE;" )
+        sql+=( "SET GLOBAL server_id=${SERVER_ID};" )
         sql+=( "SET GLOBAL replicate_ignore_db = 'mysql,information_schema,performance_schema';" )
-        sql+=( "STOP SLAVE;" )
         sql+=( "CHANGE MASTER TO" )
         sql+=( "MASTER_HOST='${REPLICATION_MASTER}'," )
         sql+=( "MASTER_USER='$(replication_user)'," )
