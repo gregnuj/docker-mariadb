@@ -122,7 +122,7 @@ function mysql_init_bootstrap(){
 }
 
 function mysql_init_replication(){
-    if [[ ! -z "${REPLICATION_PORT}" ]]; then
+    if [[ -z "${REPLICATION_PORT}" ]]; then
        REPLICATION_PORT=3306
     fi
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
