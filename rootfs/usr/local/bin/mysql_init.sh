@@ -122,6 +122,9 @@ function mysql_init_bootstrap(){
 }
 
 function mysql_init_replication(){
+    if [[ ! -z "${REPLICATION_PORT}" ]]; then
+       REPLICATION_PORT=3306
+    fi
     if [[ ! -z "${REPLICATION_MASTER}" ]]; then
         SERVER_ID="${SERVER_ID:="$(hostname -i | awk -F. '{print $NF}')"}"
         REPLICATION_USER="$(replication_user)"
@@ -134,7 +137,7 @@ function mysql_init_replication(){
         sql+=( "MASTER_USER='$(replication_user)'," )
         sql+=( "MASTER_PASSWORD='$(replication_password)'," )
         sql+=( "MASTER_USE_GTID=current_pos," )
-        sql+=( "MASTER_PORT=3306," )
+        sql+=( "MASTER_PORT=${REPLICATION_PORT}," )
         sql+=( "MASTER_CONNECT_RETRY=30;" )
         sql+=( "START SLAVE;" )
         echo "${sql[@]}"
