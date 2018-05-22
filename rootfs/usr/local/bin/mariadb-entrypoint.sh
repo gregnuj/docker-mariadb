@@ -8,12 +8,6 @@ if [[ -n "$DEBUG" ]]; then
     set -x
 fi
 
-# copy /configs files
-configs="$(find /configs/ -type f -exec ls  {} \; 2> /dev/null | awk  '!/\/\./{print substr($0,9)}')"
-for config in $configs; do
-    cp --preserve=all "/configs${config}" "${config}"
-done;
-
 # capture parameters
 declare -a cmd=( "$@" )
 
